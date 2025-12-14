@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>CheckInfra – Diagnóstico Sanitário Escolar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+    }
+
+    /* ===== HEADER SIMPLES ===== */
+    .header {
+      background: #1f4fd8;
+      height: 70px;
+    }
+
+    /* ===== CONTEÚDO CENTRAL ===== */
+    .container {
+      max-width: 420px;
+      margin: 40px auto;
+      padding: 0 20px;
+      text-align: center;
+    }
+
+    /* ===== LOGO CENTRAL ===== */
+    .logo-central {
+      margin-bottom: 30px;
+    }
+
+    .logo-central img {
+      width: 160px;
+      height: auto;
+      display: block;
+      margin: 0 auto 10px;
+    }
+
+    .logo-central h1 {
+      font-size: 22px;
+      margin: 0;
+      color: #1f4fd8;
+    }
+
+    .logo-central p {
+      font-size: 14px;
+      color: #555;
+      margin-top: 6px;
+    }
+
+    /* ===== AÇÕES / CARDS ===== */
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 30px;
+    }
+
+    .actions a {
+      text-decoration: none;
+      padding: 18px;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 16px;
+      transition: 0.2s;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    .btn-primary {
+      background: #1f4fd8;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #163ca6;
+    }
+
+    .btn-secondary {
+      background: #ffffff;
+      color: #333;
+      border: 1px solid #ddd;
+    }
+
+    .btn-secondary:hover {
+      background: #f0f2f5;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- Faixa azul -->
+<header class="header"></header>
+
+<!-- Conteúdo -->
+<main class="container">
+
+  <!-- Logo central -->
+  <div class="logo-central">
+    <img src="./assets/logo-checkinfra.png" alt="CheckInfra">
+    <h1>CheckInfra</h1>
+    <p>Diagnóstico Sanitário de Banheiros Escolares</p>
+  </div>
+
+  <!-- Cards verticais -->
+  <div class="actions">
+    <a href="./avaliacao.html" class="btn-primary">
+      📝 Realizar Avaliação
+    </a>
+
+    <a href="./painel/" class="btn-secondary">
+      📊 Painel Técnico
+    </a>
+
+    <a href="./mapa/" class="btn-secondary">
+      🗺️ Mapa da Secretaria
+    </a>
+  </div>
+
+</main>
+
+</body>
+</html>

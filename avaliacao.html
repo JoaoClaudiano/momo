@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>CheckInfra – Avaliação Sanitária</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- Lista de escolas -->
+<script src="./mapa/escolas.js"></script>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  margin: 0;
+}
+
+.card {
+  background:#fff;
+  max-width:800px;
+  margin:40px auto;
+  padding:25px;
+  border-radius:8px;
+}
+
+label {
+  display:block;
+  margin-top:15px;
+  font-weight:bold;
+}
+
+input[type="text"], input[type="file"] {
+  width:100%;
+  margin-top:6px;
+}
+
+.group {
+  margin-top:20px;
+  padding:15px;
+  border:1px solid #ddd;
+  border-radius:6px;
+}
+
+.check {
+  display:flex;
+  gap:10px;
+  margin-top:8px;
+}
+
+button {
+  margin-top:30px;
+  width:100%;
+  padding:15px;
+  font-size:16px;
+  background:#1f4fd8;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.resultado {
+  margin-top:20px;
+  padding:15px;
+  border-radius:6px;
+  font-weight:bold;
+}
+
+.ok { background:#d4edda; }
+.alerta { background:#fff3cd; }
+.critico { background:#f8d7da; }
+</style>
+</head>
+
+<body>
+
+<div class="card">
+<h2>Avaliação Sanitária dos Banheiros</h2>
+
+<label>Escola</label>
+<input id="escola" list="listaEscolas" placeholder="Digite ou selecione">
+<datalist id="listaEscolas"></datalist>
+
+<label>Avaliador</label>
+<input id="avaliador" type="text">
+
+<label>Fotos do banheiro (opcional)</label>
+<input id="fotos" type="file" accept="image/*" multiple>
+
+<div class="group">
+  <div class="check"><input type="checkbox" data-peso="4"> Mofo / bolor</div>
+  <div class="check"><input type="checkbox" data-peso="3"> Infiltração</div>
+  <div class="check"><input type="checkbox" data-peso="2"> Vazamentos</div>
+  <div class="check"><input type="checkbox" data-peso="2"> Mau cheiro</div>
+  <div class="check"><input type="checkbox" data-peso="1"> Iluminação ruim</div>
+</div>
+
+<button onclick="gerarDiagnostico()">Gerar diagnóstico e PDF</button>
+
+<div id="resultado" class="resultado"></div>
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwIqrAdgd7pLsW0kYAnrrHQ-WrCsnbR4Eh9BpkamYbrKwCOFP5fH6N52HFw2nOz2t2G/exec";
+
+/* Preenche escolas */
+const lista = document.getElementById("listaEscolas");
+escolas.forEach(e => {
+  const opt = document.createElement("option");
+  opt.value = e.nome;
+  lista.appendChild(opt);
+});
+
+function gerarDiagnostico() {
+  const escola = document.getElementById("escola").value;
+  const avaliador = document.getElementById("avaliador").value;
+  const arquivos = document.getElementById("fotos").files;
+
+  if (!escola || !avaliador) {
+    alert("Preencha a escola e o avaliador");
+    return;
+  }
+
+  let score = 0;
+  let problemas = [];
+
+  document.querySelectorAll("input[type=checkbox]").forEach(cb => {
+    if (cb.checked) {
+      score += parseInt(cb.dataset.peso);
+      problemas.push(cb.parentElement.textContent.trim());
+    }
+  });
+
+  let status = "Condição adequada";
+  let classe = "ok";
+
+  if (score >= 9) {
+    status = "Condição crítica";
+    classe = "critico";
+  } else if (score >= 4) {
+    status = "Situação de alerta";
+    classe = "alerta";
+  }
+
+  const r = document.getElementById("resultado");
+  r.className = "resultado " + classe;
+  r.innerHTML = `
+    Escola: ${escola}<br>
+    Avaliador: ${avaliador}<br>
+    Pontuação: ${score}<br>
+    Status: ${status}
+  `;
+
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      escola,
+      avaliador,
+      pontuacao: score,
+      status,
+      problemas: problemas.join("; ")
+    })
+  });
+
+  gerarPDF(escola, avaliador, score, status, arquivos);
+}
+
+function gerarPDF(escola, avaliador, score, status, arquivos) {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+
+  let y = 20;
+
+  pdf.text("Relatório Sanitário – CheckInfra", 20, y); y += 15;
+  pdf.text(`Escola: ${escola}`, 20, y); y += 10;
+  pdf.text(`Avaliador: ${avaliador}`, 20, y); y += 10;
+  pdf.text(`Pontuação: ${score}`, 20, y); y += 10;
+  pdf.text(`Status: ${status}`, 20, y); y += 15;
+
+  if (arquivos.length > 0) {
+    pdf.text("Registro Fotográfico:", 20, y);
+    y += 10;
+
+    Array.from(arquivos).forEach((file, index) => {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        pdf.addImage(e.target.result, "JPEG", 20, y, 160, 90);
+        y += 100;
+
+        if (index === arquivos.length - 1) {
+          pdf.save(`avaliacao_${escola}.pdf`);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  } else {
+    pdf.save(`avaliacao_${escola}.pdf`);
+  }
+}
+</script>
+
+</body>
+</html>
